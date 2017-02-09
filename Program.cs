@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DoFactory.GangOfFour.Facade.Structural
+namespace ConsoleApplication
 {
     /// <summary>
     /// The 'Subsystem ClassA' class
@@ -79,29 +79,19 @@ namespace DoFactory.GangOfFour.Facade.Structural
             _three.MethodThree();
         }
     }
-
-    /// <summary>
-    /// MainApp startup class for Structural
-    /// Facade Design Pattern.
-    /// </summary>
-    class MainApp
+    public class Program
     {
-        /// <summary>
-        /// Entry point into console application.
-        /// </summary>
-        public static void Main()
+        public static void Main(string[] args)
         {
+            Console.WriteLine("Hello World!");
             Facade facade = new Facade();
 
             facade.MethodA();
             facade.MethodB();
 
-            // Wait for user
-            Console.ReadKey();
         }
     }
 }
-
 /* Output
 
 MethodA() ----
