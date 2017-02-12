@@ -1,106 +1,123 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ConsoleApplication
 {
-    /// <summary>
-    /// The 'Subsystem ClassA' class
-    /// </summary>
-    class SubSystemOne
+    class item {
+        public string Serial { get; set; }
+        public string ModelNumber { get; set; }
+        public DateTime ReleaseDate { get; set; }
+        public double Price { get; set; }
+        public string Photo {get; set; }
+    }
+    class InventorySubSystem
     {
-        public void MethodOne()
+        public List<item> GetInventoryForLocation(string location)
         {
-            Console.WriteLine(" SubSystemOne Method");
+            Console.WriteLine("Getting inventory for: " + location);
+            List<item> inventory = new List<item>{};
+            switch(location)
+            {
+                case "Dallas":
+                    inventory = new List<item> {
+                        new item{
+                            Serial = "123456"
+                        }
+                    };
+                    break;
+                case "New York":
+                    inventory = new List<item> {
+                        new item{
+                            Serial = "654321"
+                        }
+                    };
+                    break;
+            }
+            return inventory;
+        }
+        public string GetModelNumberForSerialNumber(string serialNumber)
+        {
+            Console.WriteLine("Getting model number for: " + serialNumber);
+            switch(serialNumber)
+            {
+                case "123456":
+                    return "DAL-123";
+                case "654321":
+                    return "NYC-123";
+            }
+            return "";
         }
     }
 
-    /// <summary>
-    /// The 'Subsystem ClassB' class
-    /// </summary>
-    class SubSystemTwo
+    class MarketingSubSystem
     {
-        public void MethodTwo()
+        public string GetPhotoForModelNumber(string modelNumber)
         {
-            Console.WriteLine(" SubSystemTwo Method");
+            Console.WriteLine("Getting photo for: " + modelNumber);
+            return "somePhoto";
+        }
+        public double GetPriceForModelNumber(string modelNumber)
+        {
+            return 9.99;
         }
     }
 
-    /// <summary>
-    /// The 'Subsystem ClassC' class
-    /// </summary>
-    class SubSystemThree
-    {
-        public void MethodThree()
-        {
-            Console.WriteLine(" SubSystemThree Method");
-        }
-    }
-
-    /// <summary>
-    /// The 'Subsystem ClassD' class
-    /// </summary>
-    class SubSystemFour
-    {
-        public void MethodFour()
-        {
-            Console.WriteLine(" SubSystemFour Method");
-        }
-    }
-
-    /// <summary>
-    /// The 'Facade' class
-    /// </summary>
     class Facade
     {
-        private SubSystemOne _one;
-        private SubSystemTwo _two;
-        private SubSystemThree _three;
-        private SubSystemFour _four;
+        private InventorySubSystem inv;
+        private MarketingSubSystem mkting;
 
         public Facade()
         {
-            _one = new SubSystemOne();
-            _two = new SubSystemTwo();
-            _three = new SubSystemThree();
-            _four = new SubSystemFour();
+            inv = new InventorySubSystem();
+            mkting = new MarketingSubSystem();
         }
 
-        public void MethodA()
+        public void printAvailableProducts()
         {
-            Console.WriteLine("\nMethodA() ---- ");
-            _one.MethodOne();
-            _two.MethodTwo();
-            _four.MethodFour();
-        }
-
-        public void MethodB()
-        {
-            Console.WriteLine("\nMethodB() ---- ");
-            _two.MethodTwo();
-            _three.MethodThree();
+            List<item> availableInventory = new List<item>{};
+            string result = "Results:\n";
+            Console.WriteLine("\nFacade ---- ");
+            availableInventory.AddRange(inv.GetInventoryForLocation("Dallas"));
+            availableInventory.AddRange(inv.GetInventoryForLocation("New York"));
+            foreach (item item in availableInventory) {
+                item.ModelNumber = inv.GetModelNumberForSerialNumber(item.Serial);
+                item.Photo = mkting.GetPhotoForModelNumber(item.ModelNumber);
+                item.Price = mkting.GetPriceForModelNumber(item.ModelNumber);
+                result += item.ModelNumber + ", " + item.Photo + ", $" + item.Price + "\n";
+            }
+            Console.WriteLine(result);
         }
     }
+    // Program to get available products
     public class Program
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
             Facade facade = new Facade();
 
-            facade.MethodA();
-            facade.MethodB();
+            // Without Facade
+            // Query inventory from Dallas server
+            // Query inventory from New York server
+            // Match serial numbers to model numbers
+            // Get photos for evey model number
+            // Print photo, model #, and cost
+
+            // With Facade
+            facade.printAvailableProducts();
 
         }
     }
 }
 /* Output
-
-MethodA() ----
-SubSystemOne Method
-SubSystemTwo Method
-SubSystemFour Method
-
-MethodB() ----
-SubSystemTwo Method
-SubSystemThree Method
-
+Facade ---- 
+Getting inventory for: Dallas
+Getting inventory for: New York
+Getting model number for: 123456
+Getting photo for: DAL-123
+Getting model number for: 654321
+Getting photo for: NYC-123
+Results:
+DAL-123, somePhoto, $9.99
+NYC-123, somePhoto, $9.99
 */
