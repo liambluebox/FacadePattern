@@ -8,7 +8,8 @@ namespace ConsoleApplication
         public string ModelNumber { get; set; }
         public DateTime ReleaseDate { get; set; }
         public double Price { get; set; }
-        public string Photo {get; set; }
+        public string Photo { get; set; }
+        public bool IsAvailable { get; set; }
     }
     class InventorySubSystem
     {
@@ -21,14 +22,16 @@ namespace ConsoleApplication
                 case "Dallas":
                     inventory = new List<item> {
                         new item{
-                            Serial = "123456"
+                            Serial = "123456",
+                            IsAvailable = true
                         }
                     };
                     break;
                 case "New York":
                     inventory = new List<item> {
                         new item{
-                            Serial = "654321"
+                            Serial = "654321",
+                            IsAvailable = true
                         }
                     };
                     break;
@@ -46,6 +49,11 @@ namespace ConsoleApplication
                     return "NYC-123";
             }
             return "";
+        }
+        public bool ItemIsAvailable(item item)
+        {
+            Console.WriteLine("Checking serial number for availability: " + item.Serial);
+            return item.IsAvailable;
         }
     }
 
@@ -75,12 +83,14 @@ namespace ConsoleApplication
 
         public void printAvailableProducts()
         {
-            List<item> availableInventory = new List<item>{};
+            List<item> inventory = new List<item>{};
             string result = "Results:\n";
-            Console.WriteLine("\nFacade ---- ");
-            availableInventory.AddRange(inv.GetInventoryForLocation("Dallas"));
-            availableInventory.AddRange(inv.GetInventoryForLocation("New York"));
-            foreach (item item in availableInventory) {
+            inventory.AddRange(inv.GetInventoryForLocation("Dallas"));
+            inventory.AddRange(inv.GetInventoryForLocation("New York"));
+            foreach (item item in inventory) {
+                if (!inv.ItemIsAvailable(item)){
+                    continue;
+                }
                 item.ModelNumber = inv.GetModelNumberForSerialNumber(item.Serial);
                 item.Photo = mkting.GetPhotoForModelNumber(item.ModelNumber);
                 item.Price = mkting.GetPriceForModelNumber(item.ModelNumber);
@@ -94,23 +104,32 @@ namespace ConsoleApplication
     {
         public static void Main(string[] args)
         {
-            Facade facade = new Facade();
-
             // Without Facade
-            // Query inventory from Dallas server
-            // Query inventory from New York server
-            // Match serial numbers to model numbers
-            // Get photos for evey model number
-            // Print photo, model #, and cost
+            InventorySubSystem inv = new InventorySubSystem();
+            MarketingSubSystem mkting = new MarketingSubSystem();
+            List<item> inventory = new List<item>{};
+            string result = "Results:\n";
+            inventory.AddRange(inv.GetInventoryForLocation("Dallas"));
+            inventory.AddRange(inv.GetInventoryForLocation("New York"));
+            foreach (item item in inventory) {
+                if (!inv.ItemIsAvailable(item)){
+                    continue;
+                }
+                item.ModelNumber = inv.GetModelNumberForSerialNumber(item.Serial);
+                item.Photo = mkting.GetPhotoForModelNumber(item.ModelNumber);
+                item.Price = mkting.GetPriceForModelNumber(item.ModelNumber);
+                result += item.ModelNumber + ", " + item.Photo + ", $" + item.Price + "\n";
+            }
+            Console.WriteLine(result);
 
             // With Facade
+            Facade facade = new Facade();
             facade.printAvailableProducts();
 
         }
     }
 }
 /* Output
-Facade ---- 
 Getting inventory for: Dallas
 Getting inventory for: New York
 Getting model number for: 123456
